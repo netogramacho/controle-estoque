@@ -52,6 +52,7 @@ function fecharModalOverlay(e) {
 function renderTabela() {
   const busca = document.getElementById('busca').value.toLowerCase();
   const tbody = document.getElementById('tbody');
+  const grid  = document.getElementById('produtos-grid');
   const empty = document.getElementById('empty');
   const tfoot = document.getElementById('tfoot-estoque');
 
@@ -68,30 +69,30 @@ function renderTabela() {
   if (!filtrado.length) {
     tbody.innerHTML = '';
     tfoot.innerHTML = '';
+    grid.innerHTML = '';
     empty.style.display = '';
     return;
   }
   empty.style.display = 'none';
 
-  tbody.innerHTML = filtrado.map(p => {
-    const badge = p.quantidade === 0
-      ? `<span class="badge badge-empty">Sem estoque</span>`
-      : p.quantidade <= 5
-      ? `<span class="badge badge-low">Baixo</span>`
-      : `<span class="badge badge-ok">OK</span>`;
+  const badge = p => p.quantidade === 0
+    ? `<span class="badge badge-empty">Sem estoque</span>`
+    : p.quantidade <= 5
+    ? `<span class="badge badge-low">Baixo</span>`
+    : `<span class="badge badge-ok">OK</span>`;
 
-    return `<tr>
-      <td><strong>${esc(p.nome)}</strong></td>
-      <td>${esc(p.categoria || '—')}</td>
-      <td>${esc(p.tamanho || '—')}</td>
-      <td>${p.quantidade}</td>
-      <td>${badge}</td>
-      <td class="actions">
-        <button class="btn btn-edit" onclick="abrirModal('${p.id}')">Editar</button>
-        <button class="btn btn-danger" onclick="remover('${p.id}')">Excluir</button>
-      </td>
-    </tr>`;
-  }).join('');
+  // ── Tabela (desktop) ──────────────────────────────────
+  tbody.innerHTML = filtrado.map(p => `<tr>
+    <td><strong>${esc(p.nome)}</strong></td>
+    <td>${esc(p.categoria || '—')}</td>
+    <td>${esc(p.tamanho || '—')}</td>
+    <td>${p.quantidade}</td>
+    <td>${badge(p)}</td>
+    <td class="actions">
+      <button class="btn btn-edit" onclick="abrirModal('${p.id}')">Editar</button>
+      <button class="btn btn-danger" onclick="remover('${p.id}')">Excluir</button>
+    </td>
+  </tr>`).join('');
 
   const totalQtd = filtrado.reduce((s, p) => s + p.quantidade, 0);
   tfoot.innerHTML = `<tr class="tfoot-total">
@@ -99,6 +100,31 @@ function renderTabela() {
     <td><strong>${totalQtd}</strong></td>
     <td colspan="2"></td>
   </tr>`;
+
+  // ── Cards (mobile) ────────────────────────────────────
+  grid.innerHTML = filtrado.map(p => `<div class="produto-card">
+    <div class="produto-card-topo">
+      <div class="produto-nome-wrap">
+        <strong class="produto-nome">${esc(p.nome)}</strong>
+        ${p.tamanho ? `<span class="produto-tamanho">${esc(p.tamanho)}</span>` : ''}
+      </div>
+      ${badge(p)}
+    </div>
+    <div class="produto-card-body">
+      <div class="produto-campo">
+        <span class="campo-label">Categoria</span>
+        <span class="campo-valor">${esc(p.categoria || '—')}</span>
+      </div>
+      <div class="produto-campo">
+        <span class="campo-label">Quantidade</span>
+        <span class="campo-valor"><strong>${p.quantidade}</strong></span>
+      </div>
+    </div>
+    <div class="produto-card-footer">
+      <button class="btn btn-edit" onclick="abrirModal('${p.id}')">Editar</button>
+      <button class="btn btn-danger" onclick="remover('${p.id}')">Excluir</button>
+    </div>
+  </div>`).join('');
 }
 
 async function salvar() {
@@ -266,10 +292,12 @@ async function salvarVenda() {
 
 function renderVendas() {
   const tbody = document.getElementById('tbody-vendas');
+  const grid  = document.getElementById('vendas-grid');
   const empty = document.getElementById('empty-vendas');
 
   if (!vendas.length) {
     tbody.innerHTML = '';
+    grid.innerHTML  = '';
     empty.style.display = '';
     document.getElementById('vendas-info').textContent = '';
     return;
@@ -280,7 +308,7 @@ function renderVendas() {
   document.getElementById('vendas-info').textContent =
     `${vendas.length} venda${vendas.length !== 1 ? 's' : ''} · Total: R$ ${totalGeral.toFixed(2).replace('.', ',')}`;
 
-  tbody.innerHTML = vendas.map(v => {
+  const rows = vendas.map(v => {
     const itens = v.itens || (v.produto_nome
       ? [{ produto_nome: v.produto_nome, tamanho: '', quantidade: v.quantidade, preco_unitario: v.preco_unitario, subtotal: v.total }]
       : []);
@@ -312,21 +340,53 @@ function renderVendas() {
                onclick="event.stopPropagation();pagarVenda('${v.id}')">Pagar</button>`
       : '';
 
-    return `
-      <tr class="venda-row" onclick="toggleDetalhe('${v.id}')">
-        <td>${dataFmt}</td>
-        <td>${esc(v.nome || '—')}</td>
-        <td>${itens.length} item${itens.length !== 1 ? 'ns' : ''}</td>
-        <td><strong>R$ ${(v.total || 0).toFixed(2).replace('.', ',')}</strong></td>
-        <td>${pagoBadge}</td>
-        <td class="actions">${btnPagar}<button class="btn btn-danger" style="padding:4px 10px;font-size:.78rem"
-               onclick="event.stopPropagation();excluirVenda('${v.id}')">Excluir</button></td>
-        <td><span class="chevron" id="chv-${v.id}">▼</span></td>
-      </tr>
-      <tr class="detalhe-row" id="det-${v.id}">
-        <td colspan="7"><div class="detalhe-content">${itensDetalhe}${descricaoHtml}</div></td>
-      </tr>`;
-  }).join('');
+    return { v, itens, pagoBadge, dataFmt, descricaoHtml, itensDetalhe, btnPagar };
+  });
+
+  // ── Tabela (desktop) ──────────────────────────────────
+  tbody.innerHTML = rows.map(({ v, itens, pagoBadge, dataFmt, itensDetalhe, descricaoHtml, btnPagar }) => `
+    <tr class="venda-row" onclick="toggleDetalhe('${v.id}')">
+      <td>${dataFmt}</td>
+      <td>${esc(v.nome || '—')}</td>
+      <td>${itens.length} item${itens.length !== 1 ? 'ns' : ''}</td>
+      <td><strong>R$ ${(v.total || 0).toFixed(2).replace('.', ',')}</strong></td>
+      <td>${pagoBadge}</td>
+      <td class="actions">${btnPagar}<button class="btn btn-danger" style="padding:4px 10px;font-size:.78rem"
+             onclick="event.stopPropagation();excluirVenda('${v.id}')">Excluir</button></td>
+      <td><span class="chevron" id="chv-${v.id}">▼</span></td>
+    </tr>
+    <tr class="detalhe-row" id="det-${v.id}">
+      <td colspan="7"><div class="detalhe-content">${itensDetalhe}${descricaoHtml}</div></td>
+    </tr>`).join('');
+
+  // ── Cards (mobile) ────────────────────────────────────
+  grid.innerHTML = rows.map(({ v, itens, pagoBadge, dataFmt, itensDetalhe, descricaoHtml, btnPagar }) => `
+    <div class="venda-linha" onclick="toggleVendaCard('${v.id}')">
+      <div class="venda-linha-row">
+        <span class="venda-ln-nome">${esc(v.nome || '—')}</span>
+        <span class="venda-ln-qtd">${itens.length} it.</span>
+        <strong class="venda-ln-total">R$ ${(v.total || 0).toFixed(2).replace('.', ',')}</strong>
+        ${pagoBadge}
+        <span class="produto-chevron" id="vchv-${v.id}">▼</span>
+      </div>
+      <div class="venda-card-detalhe" id="vdet-${v.id}">
+        <div class="venda-det-data"><span class="campo-label">Data</span> ${dataFmt}</div>
+        ${itensDetalhe}
+        ${descricaoHtml}
+        <div class="venda-det-acoes" onclick="event.stopPropagation()">
+          ${btnPagar}
+          <button class="btn btn-danger" style="padding:4px 10px;font-size:.78rem"
+                  onclick="excluirVenda('${v.id}')">Excluir</button>
+        </div>
+      </div>
+    </div>`).join('');
+}
+
+function toggleVendaCard(id) {
+  const det = document.getElementById('vdet-' + id);
+  const chv = document.getElementById('vchv-' + id);
+  const aberto = det.classList.toggle('open');
+  chv.textContent = aberto ? '▲' : '▼';
 }
 
 let pagarVendaId = null;

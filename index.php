@@ -38,8 +38,9 @@
         <tbody id="tbody"></tbody>
         <tfoot id="tfoot-estoque"></tfoot>
       </table>
-      <div class="empty-state" id="empty" style="display:none">Nenhum produto cadastrado.</div>
     </div>
+    <div class="produtos-grid" id="produtos-grid"></div>
+    <div class="empty-state" id="empty" style="display:none">Nenhum produto cadastrado.</div>
   </div>
 
   <!-- ── Vendas ──────────────────────────────────────── -->
@@ -64,8 +65,9 @@
         </thead>
         <tbody id="tbody-vendas"></tbody>
       </table>
-      <div class="empty-state" id="empty-vendas" style="display:none">Nenhuma venda registrada.</div>
     </div>
+    <div class="produtos-grid" id="vendas-grid"></div>
+    <div class="empty-state" id="empty-vendas" style="display:none">Nenhuma venda registrada.</div>
   </div>
 
 </main>
