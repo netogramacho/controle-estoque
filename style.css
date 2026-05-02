@@ -290,7 +290,7 @@ td { padding: 10px 12px; }
 
 .item-linha {
   display: grid;
-  grid-template-columns: 1fr 80px 100px 90px 32px;
+  grid-template-columns: 1fr 100px 90px 32px;
   gap: 8px;
   align-items: center;
   margin-bottom: 8px;
@@ -523,16 +523,15 @@ td { padding: 10px 12px; }
   .modal-grid { grid-template-columns: 1fr; }
   .modal-grid .col-span-2 { grid-column: span 1; }
 
-  /* Item venda: 2 colunas com áreas */
+  /* Item venda: produto em cima, preco/sub/remove embaixo */
   .item-linha {
-    grid-template-columns: 1fr 1fr;
-    grid-template-areas: "produto produto" "qtd preco" "sub remove";
+    grid-template-columns: 1fr auto auto;
+    grid-template-areas: "produto produto produto" "preco sub remove";
     padding-bottom: 10px;
     border-bottom: 1px solid #f1f5f9;
     margin-bottom: 10px;
   }
   .item-linha .ac-wrap         { grid-area: produto; }
-  .item-linha .item-qtd        { grid-area: qtd; }
   .item-linha .item-preco      { grid-area: preco; }
   .item-linha .item-sub        { grid-area: sub; align-self: center; }
   .item-linha .btn-remove-item { grid-area: remove; justify-self: end; align-self: center; font-size: 1.4rem; }
