@@ -402,9 +402,8 @@ td { padding: 10px 12px; }
 }
 .detalhe-item:last-child { border-bottom: none; }
 .di-nome { color: #222; }
-.di-nome em { color: #64748b; font-style: normal; margin-left: 4px; font-size: .8rem; }
-.di-qtd, .di-preco, .di-sub { color: #64748b; text-align: right; }
-.di-sub { color: #222; font-weight: 500; }
+.di-cat, .di-tam { color: #64748b; font-size: .85rem; text-align: center; }
+.di-sub { color: #222; font-weight: 500; text-align: right; }
 
 .detalhe-descricao {
   margin-top: 10px;

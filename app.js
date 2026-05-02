@@ -196,8 +196,6 @@ function adicionarItem() {
       <input class="item-produto-id" type="hidden">
       <div class="ac-dropdown"></div>
     </div>
-    <input class="item-qtd" type="tel" inputmode="numeric" pattern="[0-9]*" value="1" placeholder="Qtd"
-           oninput="this.value=this.value.replace(/[^0-9]/g,'');calcularTotal()">
     <input class="item-preco" type="tel" inputmode="decimal" pattern="[0-9]*[,.]?[0-9]{0,2}" placeholder="Preço"
            oninput="this.value=this.value.replace(/[^0-9,.]/g,'');calcularTotal()">
     <span class="item-sub">—</span>
@@ -248,9 +246,8 @@ document.addEventListener('click', e => {
 function calcularTotal() {
   let total = 0;
   document.querySelectorAll('.item-linha').forEach(linha => {
-    const qtd   = parseInt(linha.querySelector('.item-qtd').value) || 0;
     const preco = parseFloat(linha.querySelector('.item-preco').value.replace(',', '.')) || 0;
-    const sub   = qtd * preco;
+    const sub   = preco;
     total += sub;
     linha.querySelector('.item-sub').textContent = sub > 0 ? 'R$ ' + sub.toFixed(2).replace('.', ',') : '—';
   });
@@ -268,9 +265,8 @@ async function salvarVenda() {
   const itens = [];
   document.querySelectorAll('.item-linha').forEach(linha => {
     const produto_id     = linha.querySelector('.item-produto-id').value;
-    const quantidade     = parseInt(linha.querySelector('.item-qtd').value) || 0;
     const preco_unitario = linha.querySelector('.item-preco').value;
-    if (produto_id && quantidade > 0) itens.push({ produto_id, quantidade, preco_unitario });
+    if (produto_id) itens.push({ produto_id, quantidade: 1, preco_unitario });
   });
 
   if (!itens.length) { mostrarMsg('msg-venda', 'Adicione ao menos um item.', false); return; }
@@ -329,10 +325,10 @@ function renderVendas() {
 
     const itensDetalhe = itens.map(i => `
       <div class="detalhe-item">
-        <span class="di-nome">${esc(i.produto_nome)}${i.produto_categoria ? ' · <em>' + esc(i.produto_categoria) + '</em>' : ''}${i.tamanho ? ' · <em>' + esc(i.tamanho) + '</em>' : ''}</span>
-        <span class="di-qtd">${i.quantidade}×</span>
-        <span class="di-preco">R$ ${(i.preco_unitario || 0).toFixed(2).replace('.', ',')}</span>
-        <span class="di-sub">= R$ ${(i.subtotal || 0).toFixed(2).replace('.', ',')}</span>
+        <span class="di-nome">${esc(i.produto_nome)}</span>
+        <span class="di-cat">${esc(i.produto_categoria || '—')}</span>
+        <span class="di-tam">${esc(i.tamanho || '—')}</span>
+        <span class="di-sub">R$ ${(i.subtotal || 0).toFixed(2).replace('.', ',')}</span>
       </div>`).join('');
 
     const btnPagar = v.pago !== true
