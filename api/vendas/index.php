@@ -62,12 +62,13 @@ if ($metodo === 'POST') {
                 $p['quantidade'] -= $quantidade;
                 $subtotal = round($preco_unit * $quantidade, 2);
                 $itensProcessados[] = [
-                    'produto_id'     => $produto_id,
-                    'produto_nome'   => $p['nome'],
-                    'tamanho'        => $p['tamanho'] ?? '',
-                    'quantidade'     => $quantidade,
-                    'preco_unitario' => $preco_unit,
-                    'subtotal'       => $subtotal,
+                    'produto_id'        => $produto_id,
+                    'produto_nome'      => $p['nome'],
+                    'produto_categoria' => $p['categoria'] ?? '',
+                    'tamanho'           => $p['tamanho'] ?? '',
+                    'quantidade'        => $quantidade,
+                    'preco_unitario'    => $preco_unit,
+                    'subtotal'          => $subtotal,
                 ];
                 $total += $subtotal;
                 $encontrado = true;

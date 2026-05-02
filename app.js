@@ -329,7 +329,7 @@ function renderVendas() {
 
     const itensDetalhe = itens.map(i => `
       <div class="detalhe-item">
-        <span class="di-nome">${esc(i.produto_nome)}${i.tamanho ? ' <em>' + esc(i.tamanho) + '</em>' : ''}</span>
+        <span class="di-nome">${esc(i.produto_nome)}${i.produto_categoria ? ' · <em>' + esc(i.produto_categoria) + '</em>' : ''}${i.tamanho ? ' · <em>' + esc(i.tamanho) + '</em>' : ''}</span>
         <span class="di-qtd">${i.quantidade}×</span>
         <span class="di-preco">R$ ${(i.preco_unitario || 0).toFixed(2).replace('.', ',')}</span>
         <span class="di-sub">= R$ ${(i.subtotal || 0).toFixed(2).replace('.', ',')}</span>
