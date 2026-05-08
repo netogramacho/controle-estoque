@@ -218,7 +218,7 @@ function acFiltrar(input) {
   if (!resultados.length) { dropdown.innerHTML = ''; return; }
 
   dropdown.innerHTML = resultados.map(p => {
-    const label = [p.nome, p.tamanho].filter(Boolean).join(' · ');
+    const label = [p.nome, p.categoria, p.tamanho].filter(Boolean).join(' · ');
     return `<div class="ac-item" data-id="${p.id}" data-preco="${p.preco}" data-label="${esc(label)}"
                  onmousedown="acSelecionar(this)">
               <span class="ac-nome">${esc(label)}</span>
@@ -301,8 +301,9 @@ function renderVendas() {
   empty.style.display = 'none';
 
   const totalGeral = vendas.reduce((s, v) => s + (v.total || 0), 0);
+  const totalItens = vendas.reduce((s, v) => s + ((v.itens || []).length || (v.produto_nome ? 1 : 0)), 0);
   document.getElementById('vendas-info').textContent =
-    `${vendas.length} venda${vendas.length !== 1 ? 's' : ''} · Total: R$ ${totalGeral.toFixed(2).replace('.', ',')}`;
+    `${vendas.length} venda${vendas.length !== 1 ? 's' : ''} · ${totalItens} ${totalItens !== 1 ? 'itens' : 'item'} · Total: R$ ${totalGeral.toFixed(2).replace('.', ',')}`;
 
   const rows = vendas.map(v => {
     const itens = v.itens || (v.produto_nome
@@ -344,7 +345,7 @@ function renderVendas() {
     <tr class="venda-row" onclick="toggleDetalhe('${v.id}')">
       <td>${dataFmt}</td>
       <td>${esc(v.nome || '—')}</td>
-      <td>${itens.length} item${itens.length !== 1 ? 'ns' : ''}</td>
+      <td>${itens.length} ${itens.length !== 1 ? 'itens' : 'item'}</td>
       <td><strong>R$ ${(v.total || 0).toFixed(2).replace('.', ',')}</strong></td>
       <td>${pagoBadge}</td>
       <td class="actions">${btnPagar}<button class="btn btn-danger" style="padding:4px 10px;font-size:.78rem"
